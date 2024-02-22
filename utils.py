@@ -14,8 +14,10 @@
 
 import inspect
 import textwrap
-
+from openai import OpenAI
 import streamlit as st
+import os
+import logging
 
 
 def show_code(demo):
@@ -26,3 +28,67 @@ def show_code(demo):
         st.markdown("## Code")
         sourcelines, _ = inspect.getsourcelines(demo)
         st.code(textwrap.dedent("".join(sourcelines[1:])))
+
+
+def call_agents(prompt=None, text=None, image_url=None, model=None, temperature=0.7):
+    client = OpenAI(
+        # This is the default and can be omitted
+        api_key=os.environ.get("OPENAI_API_KEY"),
+    )
+    content = []
+    if text:
+        content.append(f"""{{
+                       'type':'text',         
+                       'text': '{text}'
+                            }},""")
+    if image_url:
+        content.append(f"""{{   'type':'image_url',
+                                'image_url': {{
+                                    "url": '{image_url}'
+                                }}
+                            }},""")
+    message = [
+        {
+            "role": "system",
+            "content": [prompt]
+        },
+        {
+            "role": "user",
+            "content": content,
+        }
+    ]
+    logging.info(f"Call agents with message: \n\n\n\n{message}\n\n\n\n")
+    logging.info(f"Call agents with model: {model}")
+    logging.info(f"Call agents with temperature: {temperature}")
+    chat_completion = client.chat.completions.create(
+        messages=message,
+        model=model,
+        temperature=temperature,
+        max_tokens=2048
+    )
+    return chat_completion.choices[0].message.content
+
+
+# chat_completion = client.chat.completions.create(
+#     messages=[
+#         {
+#             "role": "system",
+#             "content": ["You are a helpful assistant."]
+#         },
+#         {
+#             "role": "user",
+#             "content": [
+#                 {
+#                     'text': "Please share the detail information of the chart on different item on a nice structure JSON"
+#                 },
+#                 {
+#                     'image_url': {
+#                         "url": "https://www.visualcapitalist.com/wp-content/uploads/2024/02/Share-Of-Global-Forests2.jpg",
+#                     },
+#                 },
+#             ],
+#         }
+#     ],
+#     model="gpt-4-vision-preview",
+#     temperature=42
+# )
