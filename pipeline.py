@@ -18,11 +18,24 @@ if __name__ == "__main__":
     title, content, image_src = asyncio.run(scrapping())
     if image_src:
         image_description = call_agents(
-            prompt=dataprompt, image_url=image_src, model='gpt-4-vision-preview', temperature=0.3)
+            prompt=dataprompt,
+            text="请根据图片描述。",
+            image_url=image_src,
+            model='gpt-4-vision-preview',
+            temperature=0.3)
 
         logging.info(f"Image description: {image_description}")
 
         redreturn = call_agents(
-            prompt=redprompt, text=f"title:{title}\ncontent:{content}\n{image_description}", model='gpt-4-0125-preview', temperature=0.6)
+            prompt=redprompt,
+            text=f"""
+                标题:{title}
+                内容:{content}
+                    {image_description}""",
+            model='gpt-4-0125-preview',
+            temperature=0.3)
 
         logging.info(f"Red return: {redreturn}")
+
+    if redreturn:
+        redreturn = redreturn.strip("```")

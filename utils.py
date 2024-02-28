@@ -36,25 +36,18 @@ def call_agents(prompt=None, text=None, image_url=None, model=None, temperature=
         api_key=os.environ.get("OPENAI_API_KEY"),
     )
     content = []
-    if text:
-        content.append(f"""{{
-                       'type':'text',         
-                       'text': '{text}'
-                            }},""")
     if image_url:
-        content.append(f"""{{   'type':'image_url',
-                                'image_url': {{
-                                    "url": '{image_url}'
-                                }}
-                            }},""")
+        response = call_vision_agent(prompt=prompt, text=text,
+                                     image_url=image_url, model=model, temperature=temperature)
+        return response.choices[0].message.content
     message = [
         {
             "role": "system",
-            "content": [prompt]
+            "content": prompt
         },
         {
             "role": "user",
-            "content": content,
+            "content": text,
         }
     ]
     logging.info(f"Call agents with message: \n\n\n\n{message}\n\n\n\n")
@@ -69,6 +62,35 @@ def call_agents(prompt=None, text=None, image_url=None, model=None, temperature=
     return chat_completion.choices[0].message.content
 
 
+def call_vision_agent(prompt=None, text=None, image_url=None, model=None, temperature=0.7):
+    client = OpenAI(
+        # This is the default and can be omitted
+        api_key=os.environ.get("OPENAI_API_KEY"),
+    )
+    response = client.chat.completions.create(
+        model=model,
+        temperature=temperature,
+        messages=[
+            {
+                "role": "system",
+                "content": prompt
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": text},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image_url,
+                        },
+                    },
+                ],
+            }
+        ],
+        max_tokens=2048,
+    )
+    return response
 # chat_completion = client.chat.completions.create(
 #     messages=[
 #         {
