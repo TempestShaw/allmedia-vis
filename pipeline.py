@@ -1,9 +1,9 @@
 import asyncio
 from scrapping import *  # Assuming Scrapper is defined in this module
-from utils import call_agents
+from utils import *
 from prompt import *  # Assuming dataprompt and redprompt are defined here
 import logging
-
+import json
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -38,4 +38,4 @@ if __name__ == "__main__":
         logging.info(f"Red return: {redreturn}")
 
     if redreturn:
-        redreturn = redreturn.strip("```")
+        title, content = json_parsing(redreturn)

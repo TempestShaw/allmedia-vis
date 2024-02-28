@@ -91,26 +91,12 @@ def call_vision_agent(prompt=None, text=None, image_url=None, model=None, temper
         max_tokens=2048,
     )
     return response
-# chat_completion = client.chat.completions.create(
-#     messages=[
-#         {
-#             "role": "system",
-#             "content": ["You are a helpful assistant."]
-#         },
-#         {
-#             "role": "user",
-#             "content": [
-#                 {
-#                     'text': "Please share the detail information of the chart on different item on a nice structure JSON"
-#                 },
-#                 {
-#                     'image_url': {
-#                         "url": "https://www.visualcapitalist.com/wp-content/uploads/2024/02/Share-Of-Global-Forests2.jpg",
-#                     },
-#                 },
-#             ],
-#         }
-#     ],
-#     model="gpt-4-vision-preview",
-#     temperature=42
-# )
+
+def json_parsing(jsonLikeStr):
+    jsonLikeStr = jsonLikeStr[jsonLikeStr.find('{'):jsonLikeStr.find('}')+1]
+        data = json.loads(jsonLikeStr)
+        title = data["标题"]
+        content = data["稿子正文"]
+        logging.info(f"Title:{title}")
+        logging.info(f"Content:{content}")
+    return title,content
